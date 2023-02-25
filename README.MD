@@ -1,64 +1,78 @@
 # KVMD-ARMBIAN
-This project supports non-Raspberry Pi device to run pikvm on armbian
+这个项目是针对nanopi-neo2 安装kvmd的教程。参考了项目[https://github.com/srepac/kvmd-armbian]， 详细介绍请参考原项目。
 
-# Install
-KVMD Install for armbian
-It supports Allwinner, Amlogic and Rockchip based tv box, tested on phicomm n1, mxq pro 4k, tqc a01. 
-Chipset needs support USB OTG feature, lots of old amglogic chipset does not support otg feature, such as s805 and s905.
-You should install armbian with debian jammy as jammy has python 3.10 which the newer kvmd code is based on.
-Then running this script to install pikvm.
-Install scripts is fork from @srepac raspbian pikvm install script.
+# 写在前面
+## PIKVM
+PIKVM 是基于RPI的一个ip-KVM项目，可以通过网络远程控制电脑安装系统，开关机等操作。是远程维护的一个很好杀器。
 
-Original Script [https://kvmnerds.com/RPiKVM/install-pikvm-raspbian.sh]
+翻出来了之前的RPI4(很久以前200块淘的),安装体验了一番，很好用。后来想多做一个，无奈RPI4现在价格感人~，遂寻早替代方案，最后找到kvmd-armbian的方案。决定尝试一番。这个方案总成本不到130RMB，还是很有性价比的。
 
-# Hardware for kvmd-armbian project
-* A tv box/arm board supports otg feature:
-    - Tests on phicomm n1(Amlogic s905d), mxq pro 4k (rk322x), tqc a01(Allwinner H6). 
-    - If you are using arm board you can remove gpio patch to enable gpio feature.
-* Video capture device:
-    - HDMI to USB dongle (30 RMB On taobao, 10$ on aliexpress.)
-      cheap hdmi to usb dongle all use physics USB2.0 port, but fake USB3.0(USB 5GBPS, USB3.2GEN1) version supports 720P 60FPS,
-      usb 2.0 version only supports 720P 30FPS.
-* USB-A to USB-A cable:
-    - Recommended to cut off usb cable's power line, otherwise it might cause otg disconnect.
+## 需要准备的硬件
+* nanopi neo2 （咸鱼78 不包邮）
+![](/images/neo2.jpeg)
+* tf卡（我用淘汰下来的，0成本，新买约25包邮）
+* HDMI usb采集器 （全新39包邮）
+![](/images/usbdoge.jpeg)
+* 2xG3VM-61A1(光耦合模块) + 2x390欧电阻 + 杜邦线若干 （约5RMB）
+* 工具电烙铁
+总 130RMB左右
 
+## 焊接ATX模块(可选)
+由于我觉得指示灯没有用，这里我只焊接了开机和重启线
+- 电路图如下
+![](/images/v2.png)
+- 我自己焊的成品，很简单的，大家可以试一下
+![](/images/atx.jpeg)
+- 装起来是这样
+![](/images/assem.jpeg)
+
+# 安装指南
 ## Step 1
-- Flash armbian debian [Recommended jammy] for your tv box (If kernel not support otg you should build a kernel enable otg features)
-- Flash armbian debian jammy for all others
+- 去官网下载最新的armbian镜像包[https://www.armbian.com/nanopi-neo-2/], 注意，要下载Jammy版的，python版本更高，安装kvmd可以避免很多问题。
+- 刷镜像到TF卡里面， 可以使用balenaEtcher这个工具[https://www.balena.io/etcher].
+- 把卡插上，插上网线，插上电，等开机
+- ssh 登陆到板子，用户名密码：root/root，登陆后会让你改密码
 
-## Step 2 (skip this step if running on Orange Pi boards)
-- Modify your dtb file to enable otg feature. Change dr_mode from host to peripheral for otg usb port.
-- If you use rk322x (rk3228A rk3228B rk3229) series chipset, you can use dtb/4.4/rk332x-box.dtb 
-- Add the following to your /boot/armbianEnv.txt file
+## Step 2（ssh登陆到板子操作,使用root账号）
+- 更新系统
+```bash
+apt update
+apt upgrade
 ```
-overlays=usbhost0 usbhost1 usbhost2 usbhost3
+- 开启usb otg的功能
+```bash
+armbian-config
 ```
+依次选择system->hardware
+![](images/armbianconf0.png)
+hardware
+![](images/armbianconf1.png)
+![](images/armbianconf2.png)
+把usbhost0/1/2/3全选了（使用空格选择）
+![](images/armbianconf3.png)
+保存，按照提示重启。
 
-## Step 3 - Perform part 1 of install
-```
+## Step 3（安装第一部分）
+```bash
+cd ～
 apt install -y git vim make python3-dev gcc
-git clone https://github.com/srepac/kvmd-armbian.git
+python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+git clone https://github.com/Neo-Vincent/kvmd-armbian.git
 cd kvmd-armbian
 ./install.sh
 ```
-This will ask you to press ENTER to reboot after part 1 completes.
+这个时间可能会比较久，中间需要按回车键继续。
 
-## Step 4 - Perform part 2 of install
-- run install.sh again after reboot os to perform part 2 of install.  **NOTE:  May require one more reboot if missing /dev/kvmd-hid-[keyboard|mouse]**
-```
+## Step 4 (安装第二部分)
+- 重启后再次运行安装脚本（有可能需要再重启一次，但是我不需要）
+```bash
 cd kvmd-armbian
 ./install.sh
 ```
-- Enjoy
 
-# Tested device
- - Phicomm N1
- - TQC A01 (Ethernet port not working, only support wireless.)
- - RK322x based tvbox (MXQ, V88)
- - S905L2 based tvbox
- - Orange pi zero (tested by @MrSuicideParrot)
- - Orange Pi Zero and One (tested by @srepac)
- - Nano Pi Neo, Rock64, and Orange Pi Zero Plus (tested by @srepac)
- - Libre Computer Le Potato, La Frite 1GB, Renegade ROC-RK3328-CC and ALL-H3-CC H5 2GB (tested by @srepac)
- - Inovato Quadra tv box (tested by @srepac)
- - Big Tree Tech CB1+Rpi4 board (WIP by @srepac)
+## Step 5
+- 现在可以打开板子的ip来体验pikvm了
+主机完整外观
+![](/images/demo2.jpeg)
+体验一下远程改一下bios～
+![](/images/demo.png){:height="100px" width="400px"}
