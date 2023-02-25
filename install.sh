@@ -79,8 +79,8 @@ kvmd:
             device: /dev/kvmd-hid-mouse-alt  # allow absolute/relative mouse mode
     msd:
         type: disabled
-    atx:
-        type: disabled
+#    atx:
+#        type: disabled
     streamer:
         forever: true
         cmd_append:
@@ -356,7 +356,7 @@ install-dependencies() {
   install-python-packages
 
   echo "-> Install python3 modules dbus_next and zstandard"
-  pip3 install dbus_next zstandard
+  python3 -m pip install dbus_next zstandard
 
   echo "-> Make tesseract data link"
   ln -s /usr/share/tesseract-ocr/*/tessdata /usr/share/tessdata
@@ -445,37 +445,12 @@ fix-python-symlinks(){
   fi
 }
 
-apply-custom-patch(){
-  read -p "Do you want apply old kernel msd patch? [y/n]" answer
-  case $answer in
-    n|N|no|No)
-      echo 'You skipped this patch.'
-      ;;
-    y|Y|Yes|yes)
-      ./patches/custom/old-kernel-msd/apply.sh
-      ;;
-    *)
-      echo "Try again.";;
-  esac
-}
-
-fix-kvmd-for-tvbox-armbian(){
+fix-kvmd-for-nanopi-neo2-armbian(){
   # 打补丁来移除一些对armbian和电视盒子不太支持的特性
   cd /usr/lib/python3.10/site-packages/
+  echo "Apply path for nanopi-neo2 to adpate gpio"
   git apply ${APP_PATH}/patches/bullseye/*.patch
   cd ${APP_PATH}
-  read -p "Do you want to apply custom patches?  [y/n] " answer
-  case $answer in
-    n|N|no|No)
-     return;
-     ;;
-    y|Y|Yes|yes)
-     apply-custom-patch;
-     return;
-     ;;
-    *)
-     echo "Try again.";;
-  esac
 }
 
 fix-webterm() {
@@ -632,7 +607,7 @@ if [[ $( grep kvmd /etc/passwd | wc -l ) -eq 0 || "$1" == "-f" ]]; then
 
   printf "\n\nReboot is required to create kvmd users and groups.\nPlease re-run this script after reboot to complete the install.\n"
 
-  # fix-kvmd-for-tvbox-armbian
+  fix-kvmd-for-nanopi-neo2-armbian
 
   # Fix paste-as-keys if running python 3.7
   if [[ $( python3 -V | awk '{print $2}' | cut -d'.' -f1,2 ) == "3.7" ]]; then

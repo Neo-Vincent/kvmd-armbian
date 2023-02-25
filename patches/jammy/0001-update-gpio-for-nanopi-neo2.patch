@@ -1,0 +1,40 @@
+From 6a8fde57280fdf8b2d1ac644588e2be49dff8465 Mon Sep 17 00:00:00 2001
+From: neo <neo_vincent@outlook.com>
+Date: Sat, 25 Feb 2023 13:48:16 +0800
+Subject: [PATCH] -update gpio for nanopi-neo2
+
+---
+ kvmd/plugins/atx/gpio.py | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/kvmd/plugins/atx/gpio.py b/kvmd/plugins/atx/gpio.py
+index e7089481..32bc5b1d 100644
+--- a/kvmd/plugins/atx/gpio.py
++++ b/kvmd/plugins/atx/gpio.py
+@@ -91,18 +91,18 @@ class Plugin(BaseAtx):  # pylint: disable=too-many-instance-attributes
+     @classmethod
+     def get_plugin_options(cls) -> dict:
+         return {
+-            "device": Option("/dev/gpiochip0", type=valid_abs_path, unpack_as="device_path"),
++            "device": Option("/dev/gpiochip1", type=valid_abs_path, unpack_as="device_path"),
+ 
+-            "power_led_pin":      Option(24,    type=valid_gpio_pin),
++            "power_led_pin":      Option(201,    type=valid_gpio_pin),
+             "power_led_inverted": Option(False, type=valid_bool),
+             "power_led_debounce": Option(0.1,   type=valid_float_f0),
+ 
+-            "hdd_led_pin":      Option(22,    type=valid_gpio_pin),
++            "hdd_led_pin":      Option(3,    type=valid_gpio_pin),
+             "hdd_led_inverted": Option(False, type=valid_bool),
+             "hdd_led_debounce": Option(0.1,   type=valid_float_f0),
+ 
+-            "power_switch_pin": Option(23,  type=valid_gpio_pin),
+-            "reset_switch_pin": Option(27,  type=valid_gpio_pin),
++            "power_switch_pin": Option(200,  type=valid_gpio_pin),
++            "reset_switch_pin": Option(2,  type=valid_gpio_pin),
+             "click_delay":      Option(0.1, type=valid_float_f01),
+             "long_click_delay": Option(5.5, type=valid_float_f01),
+         }
+-- 
+2.30.1 (Apple Git-130)
+
