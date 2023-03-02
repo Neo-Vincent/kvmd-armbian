@@ -77,8 +77,8 @@ kvmd:
     hid:
         mouse_alt:
             device: /dev/kvmd-hid-mouse-alt  # allow absolute/relative mouse mode
-    msd:
-        type: disabled
+#    msd:
+#        type: disabled
 #    atx:
 #        type: disabled
     streamer:
@@ -446,7 +446,14 @@ fix-python-symlinks(){
 }
 
 fix-kvmd-for-nanopi-neo2-armbian(){
-  # 打补丁来移除一些对armbian和电视盒子不太支持的特性
+  # MSD storage in root partititon
+  fallocate -l 8G /mnt/msd
+  mkfs.ext4 /mnt/msd
+  mkdir -p /var/lib/kvmd/msd/{images,meta}
+  chown kvmd -R /var/lib/kvmd/msd/
+  cp /etc/{fstab,fstab.bak}
+  [[ ! -f /etc/fstab.bak ]] || echo "/mnt/msd /var/lib/kvmd/msd ext4 defaults,X-kvmd.otgmsd-user=kvmd 0 0" >> /etc/fstab
+
   cd /usr/lib/python3.10/site-packages/
   echo "Apply path for nanopi-neo2 to adpate gpio"
   git apply ${APP_PATH}/patches/bullseye/*.patch
