@@ -456,7 +456,7 @@ fix-kvmd-for-nanopi-neo2-armbian(){
 
   cd /usr/lib/python3.10/site-packages/
   echo "Apply path for nanopi-neo2 to adpate gpio"
-  git apply ${APP_PATH}/patches/bullseye/*.patch
+  git apply ${APP_PATH}/patches/jammy/*.patch
   cd ${APP_PATH}
 }
 
